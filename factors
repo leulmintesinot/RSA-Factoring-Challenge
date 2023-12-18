@@ -1,37 +1,51 @@
 #!/usr/bin/python3
+Import time
+import math
 import sys
-from sys import argv
 
-def factorize(value):
-
+def pollard_rho(n):
+    if n % 2 == 0:
+        return 2
+    
     x = 2
+    y = 2
+    d = 1 
 
-    if value < 2:
-        return
-    print()
-    print(value, "<- ")
-    while value % x:
-        x += 1
-    print("{:.0f}={:.0f}*{:.0f}".format(value, value / x, x))
-    print()
-    print(value, "<- ")
+    f = lambda x: (x**2 + 1) % n
 
+    while d == 1:
 
-if len(argv) != 2:
-    exit()
+        x = f(x)
+	
+        y = f(f(y))
+        d = math.gcd(abs(x - y), n)
 
-try:
-    with open(argv[1]) as file:
-        line = file.readline()
+    return d
+def main():
+    if len(sys.argv) != 2:
+        print("Usage: python factorize.py <file>")
+	return
+    file_path = sys.argv[1]
+    start_time = time.time()
+ try:
+        with open(file_path, 'r') as file:
+            numbers = file.readlines()
+        for number in numbers:
+            num = int(number.strip())
+            factor = pollard_rho(num)
 
-        while line != "":
-            value = int(line.split('\n')[0])
-            factorize(value)
-            line = file.readline()
-except FileNotFoundError:
-    print(f'File not found: {argv}')
-except ValueError:
-    print(f'Invalid input in the file: {argv}')
-except Exception as e:
-    print(f'An error occurred: {str(e)}')
-    pass
+            if factor == num:
+                # Print that the number is prime
+                print(f"{num} is prime.")
+            else:
+                print(f"{num}={factor}*{num // factor}")
+
+	if time.time() - start_time > 5:
+                print("Time limit exceeded")
+                exit()
+
+    except FileNotFoundError:
+        print(f"File '{file_path}' not found.")
+
+if __name__ == '__main__':
+    main()
